@@ -9,7 +9,8 @@
     "watch": "tsc -w",
     "dev": "nodemon ./dist/index.js",
     "lint": "eslint 'src/**/*.{js,ts,tsx}' --fix",
-    "format": "prettier --write ./src/*"
+    "format": "prettier --write ./src/*",
+    "postinstall": "npm run build"
   },
   "author": "fyelci",
   "repository": {

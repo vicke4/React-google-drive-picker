@@ -12,7 +12,8 @@ import useInjectScript from './useInjectScript'
 
 export default function useDrivePicker(): [
   (config: PickerConfiguration) => boolean | undefined,
-  authResult | undefined
+  authResult | undefined,
+  boolean
 ] {
   const defaultScopes = ['https://www.googleapis.com/auth/drive.readonly']
   const [loaded, error] = useInjectScript('https://apis.google.com/js/api.js')
@@ -165,5 +166,5 @@ export default function useDrivePicker(): [
     return true
   }
 
-  return [openPicker, authRes]
+  return [openPicker, authRes, loaded && loadedGsi]
 }
