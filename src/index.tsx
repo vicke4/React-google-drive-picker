@@ -13,7 +13,8 @@ import useInjectScript from './useInjectScript'
 export default function useDrivePicker(): [
   (config: PickerConfiguration) => boolean | undefined,
   authResult | undefined,
-  boolean
+  boolean,
+  boolean,
 ] {
   const defaultScopes = ['https://www.googleapis.com/auth/drive.readonly']
   const [loaded, error] = useInjectScript('https://apis.google.com/js/api.js')
@@ -22,6 +23,7 @@ export default function useDrivePicker(): [
   )
   const [pickerApiLoaded, setpickerApiLoaded] = useState(false)
   const [openAfterAuth, setOpenAfterAuth] = useState(false)
+  const [scopesNotApproved, setScopesNotApproved] = useState(false)
   const [authWindowVisible, setAuthWindowVisible] = useState(false)
   const [config, setConfig] =
     useState<PickerConfiguration>(defaultConfiguration)
@@ -65,17 +67,23 @@ export default function useDrivePicker(): [
   const openPicker = (config: PickerConfiguration) => {
     // global scope given conf
     setConfig(config)
-
     // if we didnt get token generate token.
     if (!config.token) {
+      const scopes = (config.customScopes ? config.customScopes : defaultScopes)
       const client = google.accounts.oauth2.initTokenClient({
         client_id: config.clientId,
-        scope: (config.customScopes ? config.customScopes : defaultScopes).join(
+        scope: scopes.join(
             ' '
         ),
         callback: (tokenResponse: authResult) => {
           setAuthRes(tokenResponse)
-          createPicker({ ...config, token: tokenResponse.access_token })
+
+          if (tokenResponse.scope.split(' ').every((scope) => scopes.includes(scope))) {
+            createPicker({ ...config, token: tokenResponse.access_token })
+            setScopesNotApproved(false);
+          } else {
+            setScopesNotApproved(true);
+          }
         },
       })
 
@@ -166,5 +174,5 @@ export default function useDrivePicker(): [
     return true
   }
 
-  return [openPicker, authRes, loaded && loadedGsi]
+  return [openPicker, authRes, loaded && loadedGsi, scopesNotApproved]
 }
