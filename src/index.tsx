@@ -77,8 +77,9 @@ export default function useDrivePicker(): [
         ),
         callback: (tokenResponse: authResult) => {
           setAuthRes(tokenResponse)
-
-          if (tokenResponse.scope.split(' ').every((scope) => scopes.includes(scope))) {
+          const authorizedScopes = tokenResponse.scope.split(' ');
+          
+          if (scopes.every((scope) => authorizedScopes.includes(scope))) {
             createPicker({ ...config, token: tokenResponse.access_token })
             setScopesNotApproved(false);
           } else {
